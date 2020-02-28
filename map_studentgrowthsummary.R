@@ -19,7 +19,7 @@ v_headers <- c("Grade", "Growth Count",
                "Initial Mean RIT", "Initial SD", "Initial Percentile", # Initial test data
                "Post Mean RIT", "Post SD", "Post Percentile", # Post test data 
                "Observed Growth", "Observed Growth SE", # Growth data
-               "Project Growth", "School Conditional Growth Index", "School Conditional Growth Percentile", # School norms
+               "Projected Growth", "School Conditional Growth Index", "School Conditional Growth Percentile", # School norms
                "Count with Projection", "Count Met Projection", "Percent Met Projection", "Student Median Conditional Growth Percentile") # Student norms
 
 # Initialize lists for text and data
@@ -73,8 +73,10 @@ for (i in 1:length(l_pdf_text)) {
     # Add variable to indicate growth period
     mutate("Growth Period" = substring(v_file_names[i] , 71, 86)) %>%
     
-    # Replace * with NA values
-    mutate_all(~ na_if(., "**"))
+    # Replace * with NA
+    mutate_all(~na_if(.,fixed("**"))) %>%
+    mutate_all(~na_if(.,fixed("*"))) #%>%
+    # mutate_all(~na_if(., "*"))
 }
 
 # Convert list into data frame
@@ -82,10 +84,14 @@ df_pdf_data <- l_pdf_data %>%
   
   ldply() %>%
   
-  # Rename columns
+  # Rename columns except for Growth Period
   rename_at(vars(-"Growth Period"), function(x) v_headers)
 
-# Reshape data into tidy data set
+# Export to CSV
+write.csv(df_pdf_data,
+          "csce_map_studentgrowthsummary.csv",
+          row.names = FALSE, 
+          na = "")
 
 
 
